@@ -1,0 +1,120 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo
+    hostname: mongo
+    volumes:
+      - /home/ubuntu:/ubuntu
+
+  postgres:
+    image: postgres
+    hostname: postgres
+    env_file:
+      - /home/ubuntu/services/postgres/.env
+    volumes:
+      - /home/ubuntu:/ubuntu
+
+  fileserver:
+    image: mercari-team10/fileserver
+    build:
+      context: /home/ubuntu/code/fileserver
+      dockerfile: /home/ubuntu/services/fileserver/fileserver.Dockerfile
+    command: sh /sos/startup-script.sh
+    hostname: files
+    ports:
+      - "30101:9991"
+      - "30102:9992"
+    volumes:
+      - /home/ubuntu/services/fileserver/data:/sos/data
+      - /home/ubuntu/services/fileserver/startup-script.sh:/sos/startup-script.sh
+      - /home/ubuntu:/ubuntu
+
+  nhid:
+    image: mercari-team10/nhid
+    build:
+      context: /home/ubuntu/code/nhid
+      dockerfile: /home/ubuntu/services/nhid/nhid.Dockerfile
+    hostname: nhid
+    ports:
+      - "30201:5000"
+    volumes:
+      - /home/ubuntu/services/nhid/nhid-config.yml:/nhid/nhid-config.yml
+      - /home/ubuntu/keys:/nhid/keys
+      - /home/ubuntu:/ubuntu
+    links:
+      - mongo
+
+  hospitals:
+    image: mercari-team10/hospitals
+    build:
+      context: /home/ubuntu/code/hospitals
+      dockerfile: /home/ubuntu/services/hospitals/hospitals.Dockerfile
+    hostname: hospitals
+    ports:
+      - "30301:5000"
+    volumes:
+      - /home/ubuntu/services/hospitals/.env:/appnts/.env
+      - /home/ubuntu/services/hospitals/database.ini:/appnts/database.ini
+      - /home/ubuntu:/ubuntu
+    links:
+      - postgres
+      - nhid
+
+  appointments:
+    image: mercari-team10/appointments
+    build:
+      context: /home/ubuntu/code/appointments
+      dockerfile: /home/ubuntu/services/appointments/appointments.Dockerfile
+    hostname: appointments
+    ports:
+      - "30401:5000"
+    volumes:
+      - /home/ubuntu/services/appointments/.env:/appnts/.env
+      - /home/ubuntu/services/appointments/database.ini:/appnts/database.ini
+      - /home/ubuntu:/ubuntu
+    links:
+      - postgres
+      - nhid
+
+  bills:
+    image: mercari-team10/bills
+    build:
+      context: /home/ubuntu/code/bills
+      dockerfile: /home/ubuntu/services/bills/bills.Dockerfile
+    hostname: bills
+    ports:
+      - "30501:5000"
+    volumes:
+      - /home/ubuntu/services/bills/.env:/bills/.env
+      - /home/ubuntu/services/bills/database.ini:/bills/database.ini
+      - /home/ubuntu:/ubuntu
+    links:
+      - postgres
+      - nhid
+
+  suggestions:
+    image: mercari-team10/suggestions
+    build:
+      context: /home/ubuntu/code/suggestions
+      dockerfile: /home/ubuntu/services/suggestions/suggestions.Dockerfile
+    hostname: suggestions
+    ports:
+      - "30601:5000"
+    volumes:
+      - /home/ubuntu/services/suggestion/.env:/appnts/.env
+      - /home/ubuntu/services/suggestions/database.ini:/appnts/database.ini
+      - /home/ubuntu:/ubuntu
+
+  calendar:
+    image: mercari-team10/calendar
+    build:
+      context: /home/ubuntu/code/calendar
+      dockerfile: /home/ubuntu/services/calendar/calendar.Dockerfile
+    hostname: calendar
+    ports:
+      - "30701:5000"
+    volumes:
+      - /home/ubuntu/services/calendar/.env:/appnts/.env
+      - /home/ubuntu/services/calendar/database.ini:/appnts/database.ini
+      - /home/ubuntu:/ubuntu

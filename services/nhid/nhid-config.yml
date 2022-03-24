@@ -1,0 +1,12 @@
+ApplicationPort: 5000
+
+Mongo:
+  UsingAuth: false
+  Username: user
+  Password: password
+  URL: mongo
+  Database: nhid_service
+
+RSA:
+  PublicKeyFile: /nhid/keys/nhid.pub
+  PrivateKeyFile: /nhid/keys/nhid.priv

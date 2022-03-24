@@ -1,0 +1,60 @@
+
+server {
+	server_name aarogya-hetu.ml;
+
+	location /api/files {
+		location /api/files/upload {
+			proxy_pass http://localhost:30101/upload;
+		}
+
+		location /api/files/fetch {
+			proxy_pass http://localhost:30102/fetch;
+		}
+	}
+
+	location /api/nhid/ {
+		proxy_pass http://localhost:30201/;
+	}
+
+	location /api/hospitals/ {
+		proxy_pass http://localhost:30301/;
+	}
+
+	location /api/appointments/ {
+		proxy_pass http://localhost:30401/;
+	}
+
+	location /api/bills/ {
+		proxy_pass http://localhost:30501/;
+	}
+
+	location /api/suggestions/ {
+		proxy_pass http://localhost:30601/;
+	}
+
+	location /api/calendar/ {
+		proxy_pass http://localhost:30701/;
+	}
+
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/aarogya-hetu.ml/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/aarogya-hetu.ml/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = aarogya-hetu.ml) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+	listen 80;
+	listen [::]:80;
+
+	server_name aarogya-hetu.ml;
+    return 404; # managed by Certbot
+}
